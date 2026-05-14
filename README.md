@@ -24,9 +24,11 @@ git clone https://github.com/ARYAVJ2003/ai-research-assistant.git
 cd ai-research-assistant
 
 2.Install dependencies:
+
 pip install -r requirements.txt
 
 3. Create a .env file and add your Google API key:
+
 GOOGLE_API_KEY=your_api_key_here
 
 
