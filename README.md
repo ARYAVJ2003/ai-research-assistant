@@ -17,8 +17,9 @@ A Python-based AI assistant that can split user queries into tasks, perform rese
 
 ## Setup
 
-1. Clone the repo:
 
+1. Clone the repo:
+   
 ```bash
 git clone https://github.com/ARYAVJ2003/ai-research-assistant.git
 cd ai-research-assistant
