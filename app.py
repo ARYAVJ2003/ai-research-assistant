@@ -19,50 +19,23 @@ if "thread_id" not in st.session_state:
  
 if "all_messages" not in st.session_state:
     st.session_state.all_messages = {}
+
+if "thread_documents" not in st.session_state:
+    st.session_state.thread_documents = {}
 # user input
 if "processing" not in st.session_state:
     st.session_state.processing = False
 
 
-uploaded_file = st.file_uploader(
-    "Upload PDF or TXT",
-    type=["pdf", "txt"]
-)
-document_text = ""
+if st.session_state.thread_id not in st.session_state.thread_documents:
+    st.session_state.thread_documents[
+        st.session_state.thread_id
+    ] = ""
 
-if uploaded_file:
+document_text = st.session_state.thread_documents[
+    st.session_state.thread_id
+]
 
-    if uploaded_file.type == "application/pdf":
-
-        document_text = extract_pdf_text(
-            uploaded_file
-        )
-
-    elif uploaded_file.type == "text/plain":
-
-        document_text = extract_txt_text(
-            uploaded_file
-        )
-
-    st.success("File uploaded successfully")
-
-    if st.button("Summarize Document"):
-
-     with st.spinner("Analyzing document..."):
-
-        result = app_graph.invoke(
-            {
-                "input": f"Summarize this document:\n{document_text}"
-            },
-            config={
-                "configurable": {
-                    "thread_id": st.session_state.thread_id
-                }
-            }
-        )
-
-     st.write(result["output"])
-# session memory
 
 # sidebar
 with st.sidebar:
@@ -91,9 +64,69 @@ with st.sidebar:
         st.session_state.thread_id
     ] = []
     
-    messages = st.session_state.all_messages[
+messages = st.session_state.all_messages[
     st.session_state.thread_id
 ]
+    
+uploaded_file = st.file_uploader(
+    "Upload PDF or TXT",
+    type=["pdf", "txt"],
+    key=f"uploader_{st.session_state.thread_id}"
+
+)
+if uploaded_file:
+
+    if uploaded_file.type == "application/pdf":
+
+        document_text = extract_pdf_text(
+            uploaded_file
+        )
+
+        st.session_state.thread_documents[
+    st.session_state.thread_id
+] = document_text
+
+    elif uploaded_file.type == "text/plain":
+
+        document_text = extract_txt_text(
+            uploaded_file
+        )
+        st.session_state.thread_documents[
+    st.session_state.thread_id
+] = document_text
+
+    st.success("File uploaded successfully")
+
+    if st.button("Summarize Document"):
+
+     with st.spinner("Analyzing document..."):
+
+        result = app_graph.invoke(
+            {
+                "input": f"Summarize this document:\n{document_text}"
+            },
+            config={
+                "configurable": {
+                    "thread_id": st.session_state.thread_id
+                }
+            }
+        )
+     
+     messages.append(
+    {
+        "role": "user",
+        "content": "Summarize uploaded document"
+    }
+)
+
+     messages.append(
+    {
+        "role": "assistant",
+        "content": result["output"]
+    }
+)
+     #st.write(result["output"])
+# session memory
 
 #user_input = st.chat_input("Ask something...")
 user_input= st.chat_input("Say something", disabled=st.session_state.processing)
